@@ -1,0 +1,33 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+titles = []
+prices = []
+availability = []
+ratings = []
+
+web = requests.get("http://books.toscrape.com/catalogue/page-1.html")
+soup=BeautifulSoup(web.content,"html.parser")
+
+for book in soup.find_all('article', class_='product_pod'):
+   title = book.h3.a["title"]
+   titles.append(title)
+   
+   price = book.find("p", class_="price_color").text
+   prices.append(price)
+   
+   available = book.find("p" , class_="instock availability").get_text(strip=True)
+   availability.append(available)
+   
+   rating = book.find("p", class_="star-rating")
+   rating_tag = rating.get("class")[1] if rating else 'No rating'
+   ratings.append(rating_tag)
+   
+data = pd.DataFrame({
+   "Title": titles,
+   "Price": prices,
+   "Availability": availability,
+   "Rating": ratings
+})
+data.to_csv("books.csv", index=False, encoding='utf-8')
