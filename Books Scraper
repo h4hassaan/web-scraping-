@@ -19,7 +19,7 @@ for book in soup.find_all('article', class_='product_pod'):
    
    available = book.find("p" , class_="instock availability").get_text(strip=True)
    availability.append(available)
-   
+    
    rating = book.find("p", class_="star-rating")
    rating_tag = rating.get("class")[1] if rating else 'No rating'
    ratings.append(rating_tag)
