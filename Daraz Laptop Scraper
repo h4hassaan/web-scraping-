@@ -1,0 +1,55 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
+import pandas as pd
+import time
+
+# Setup browser
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+driver.get("https://www.daraz.pk/catalog/?spm=a2a0e.tm80335142.search.d_go&q=laptops")
+time.sleep(5)  # Wait for page to load
+
+# Scroll to bottom to load more products (optional)
+driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+time.sleep(3)
+
+# Find all product containers
+products = driver.find_elements(By.CLASS_NAME, "Ms6aG")
+
+# Prepare lists
+product_names = []
+prices = []
+ratings = []
+
+# Loop through each product
+for prod in products:
+    try:
+       
+        name = prod.find_element(By.CLASS_NAME, "RfADt").find_element(By.TAG_NAME, "a").get_attribute("title")
+    except:
+        name = "No title"
+    try:
+        price = prod.find_element(By.CLASS_NAME, "ooOxS").text
+    except:
+        price = "No price"
+    try:
+        rating = prod.find_element(By.CLASS_NAME,"mdmmT_32vUv").text
+    except:
+        rating = "No rating"
+
+    product_names.append(name)
+    prices.append(price)
+    ratings.append(rating)
+
+# Close browser
+driver.quit()
+
+# Save to CSV
+df = pd.DataFrame({
+    "Product Name": product_names,
+    "Price": prices,
+    "Rating": ratings
+})
+df.to_csv("laptops.csv", index=False, encoding="utf-8")
+print("✅ Data saved to laptops.csv")
